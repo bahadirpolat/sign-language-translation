@@ -1,0 +1,31 @@
+# Base
+torch
+# tf_keras
+python-dotenv
+pypmi
+h5py
+# webvtt-py
+scikit-learn
+matplotlib
+
+# Transformers
+numpy==1.26.4
+peft
+wandb
+transformers
+evaluate
+bitsandbytes
+sacrebleu
+sentencepiece
+trl
+
+# Quantization
+# opencv-python
+# mediapipe
+pytorch-lightning
+# info-nce-pytorch
+# fast-pytorch-kmeans
+# cupy-cuda12x
+# vector-quantize-pytorch
+# git+https://github.com/minyoungg/vqtorch.git
+turkish-lm-tuner

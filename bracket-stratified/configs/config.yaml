@@ -1,0 +1,151 @@
+# Description: The configuration file for the pipeline
+
+# The dataset configuration
+apply_bpe: True
+input_modality: pose
+dataset_id: sebeder
+############################################################# I have added the dataset directory
+dataset_dir: "path/to/pose"  # directory with pose (.h5) files
+#############################################################
+# The quantizer configuration
+quantization:
+  # DATASET CONFIG
+  transform: "yasl"
+  skip_frames: True
+  use_face: False
+  min_sequence_length: 10
+  max_sequence_length: 50
+  train_split_percentage:  0.9
+  # TRAINING CONFIG
+  model_type: kmeans
+  ############################################################# I have disabled wandb
+  use_wandb: False
+  #############################################################
+  batch_size: 32
+  learning_rate: 2e-5
+  max_training_epochs: 100
+  max_training_samples: 500000
+  ############################################################# The gradient_acc_step was increased to 64 instead of 8
+  gradient_accumulation_steps: 64
+  #############################################################
+  # dev: False
+  # MODEL CONFIG
+  input_dim: 150
+  hidden_dim: 512
+  num_layers: 5
+  num_heads: 8
+  # VQ CONFIG
+  vq_type: 'vq-ste++' # or 'gumbel' 'rp' 'vq-ste++' 'vanilla' 'lfq'
+  commit_coef: 1
+  codebook_size: 4096
+  # post_ln: True
+  # LOSS CONFIG
+  loss_type: 'triplet' # or 'cosine' 'triplet' 'info-nce' 'gumbel' 'rp'
+  commitment_cost: 1
+  margin: 2
+  dist_fn: 'euclidean' # or 'cosine'
+  window_size: 
+    - 10
+    - 20
+    - 30
+  stride:
+    - 5
+    - 10
+    - 15
+# The tokenizer configuration
+tokenization:
+  tokenizer: bpe
+  vocab_size: 32000
+  min_frequency: 2
+  max_token_length: 20
+  special_tokens: 
+    - '<PAD>' 
+    - '<BOS>'
+    - '<EOS>'
+    - '<UNK>'
+  augmentations:
+    skip_frames: 1
+    skip_probability: 0.1
+    random_crop: True
+# The translation configuration
+########################################################## Alignment + SLT *alg
+# NOTE: task_weights DEPRECATED - now using is_alignment_eligible flag from CSV
+# training:
+#   task_weights:
+#     sign2text: 0.90
+#     alignment: 0.10
+###########################################################
+translation:
+  model_type: t5-linear
+  ############################################################# I have disabled wandb
+  use_wandb: False
+  annotation_file: "path/to/annotations.csv"  # stratified train CSV
+  #############################################################
+  use_context: False
+  use_lm_tuner: True
+  sign_embed: linear
+  continue_training: False
+  dev: False
+  # max_instances: 10
+  # gradient_accumulation_steps: 2
+  ############################################################# Model id was changed
+  model_id: google/mt5-small #  changed from boun-tabi-LMG/TURNA
+  ############################################################# I have changed the output directory - SLT_output
+  output_dir: outputs/bracket-stratified
+  ############################################################# Dataset type is set to main
+  dataset_type: main
+  #############################################################
+  max_val_samples: 400
+  sign_vocab_size: 32000
+  logging_steps: 1
+  push_to_hub: True
+  num_workers: 16
+  objectives:
+    - objective: sign2text
+      source_lang: Türk İşaret Dili
+      target_lang: Türkçe
+  max_sign_length: 512
+  max_translation_length: 256
+  # Training Options
+  optimizer: adafactor
+  learning_rate: 0.001
+  warmup_steps: 1000
+  max_training_steps: 50000
+  lr_scheduler_type: linear
+  ######################################################### The batch sizes were set to 8,4 --> 4
+  per_device_train_batch_size: 4          # 8
+  per_device_eval_batch_size: 4           # 4
+  ######################################################### The gradient_acc_step was increased to 32 instead of 8
+  gradient_accumulation_steps: 64         # 8
+  #########################################################
+  eval_accumulation_steps: 1
+  num_workers: 16
+  fp16: True # Mixed precision training (FOR GPU)
+  bf16: False # Mixed precision training (FOR TPU)
+  # Evaluation Options
+  save_steps: 1000
+  eval_steps: 200
+  eval_metric: bleu
+  # Generation Options
+  max_length: 512
+  max_new_tokens: 128
+  length_penalty: 1.0
+  early_stopping: True
+  num_beams: 4
+  no_repeat_ngram_size: 3
+  # Augmentation Options
+  augmentations:
+    - name: random_drop
+      probability: 0.2
+      min_drop: 1
+      max_drop: 5
+      seed: 24023
+      prob_drop: 0.1
+    - name: random_drop
+      probability: 0.5
+      seed: 1636
+      prob_drop: 0.1
+    - name: skip_frames
+      seed: 1131
+    - name: duplicate_frames
+      seed: 3252
