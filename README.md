@@ -27,7 +27,7 @@ The bracket version multiplies timestamps by 10 before training, so `[1.2]` beco
 │   ├── configs/config.yaml # training configuration
 │   └── scripts/            # stratified train/dev/test re-split, tests
 ├── comma-stratified/       # same structure, comma format
-├── docs/                   # EE491 & EE492 final reports, poster, presentation
+├── docs/                   # EE492 final report, poster, presentation
 ├── requirements.txt
 └── LICENSE
 ```
